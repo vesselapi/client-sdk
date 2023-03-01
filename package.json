@@ -1,0 +1,34 @@
+{
+  "name": "@vesselapi/client-sdk",
+  "version": "1.0.0",
+  "description": "Vessel API Client SDK",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "jsnext:main": "dist/index.esm.js",
+  "browser": "dist/index.umd.js",
+  "types": "dist/index.d.ts",
+  "registry": "https://registry.npmjs.org",
+  "files": [
+    "dist/*"
+  ],
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix",
+    "format": "prettier --write './**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc",
+    "build": "rollup -c",
+    "publish-package": "yarn build; yarn publish --access public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vesselapi/client-sdk.git"
+  },
+  "author": "vessel",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/vesselapi/client-sdk/issues"
+  },
+  "homepage": "https://github.com/vesselapi/client-sdk#readme",
+  "tags": [
+    "vessel"
+  ]
+}
