@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "esnext",
-    "module": "esnext",
+    "outDir": "dist",
+    "target": "es2022",
     "moduleResolution": "node",
     "noEmit": true,
     "strict": true,
@@ -11,5 +11,5 @@
     "removeComments": true
   },
   "include": ["./src"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "dist"]
 }
