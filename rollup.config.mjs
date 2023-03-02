@@ -4,16 +4,14 @@ import commonjs from '@rollup/plugin-commonjs';
 import { terser } from 'rollup-plugin-terser';
 import ts from 'rollup-plugin-ts';
 
-import pkg from './package.json' assert { type: 'json' };
-
 const EXTENSIONS = ['.ts', '.js'];
 
 export default [
   {
     input: 'src/index.ts',
     output: [
-      { file: pkg.main, format: 'cjs' },
-      { file: pkg.module, format: 'es' },
+      { file: 'dist/index.js', format: 'cjs' },
+      { file: 'dist/index.esm.js', format: 'es' },
     ],
     plugins: [
       ts(),
@@ -35,7 +33,7 @@ export default [
     output: [
       {
         name: 'VesselSDK',
-        file: pkg.browser,
+        file: 'dist/index.umd.js',
         format: 'umd',
       },
     ],
