@@ -14,7 +14,7 @@ export default class Vessel {
     this.initModal();
   }
 
-  private initMessagePassing() {
+  private initMessageHandler() {
     window.addEventListener('message', ({ data }: any) => {
       // ensure the modal exists.
       if (!this.iframe) return;
@@ -65,7 +65,7 @@ export default class Vessel {
     document.body.appendChild(iframe);
     this.iframe = iframe;
 
-    this.initMessagePassing();
+    this.initMessageHandler();
   }
 
   /**
