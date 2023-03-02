@@ -30,6 +30,9 @@ export default class Vessel {
           this.iframe.style.display = 'none';
           this.handlers.onSuccess(sessionToken);
           break;
+        case MESSAGE_TYPES.MODAL_READY:
+          this.handlers.onLoad && this.handlers.onLoad();
+          break;
       }
     });
   }
@@ -61,6 +64,8 @@ export default class Vessel {
     `;
     document.body.appendChild(iframe);
     this.iframe = iframe;
+
+    this.initMessagePassing();
   }
 
   /**
