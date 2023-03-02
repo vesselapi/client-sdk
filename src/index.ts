@@ -1,5 +1,10 @@
+import API from './api';
 import { GLOBAL_MODAL_ID, MESSAGE_TYPES } from './constants';
 import type { Config, IntegrationId } from './types';
+
+const api = new API({
+  prefixUrl: process.env.API_URL as string,
+});
 
 /**
  * The Vessel Client SDK. Responsible for rendering and interacting
@@ -15,54 +20,14 @@ export default class Vessel {
   }
 
   /**
-   * Used to handle messages sent from the modal iframe.
-   */
-  private initMessageHandler() {
-    window.addEventListener('message', ({ data }: any) => {
-      // ensure the modal exists.
-      if (!this.iframe) return;
-
-      const { messageType, sessionToken } = data;
-
-      switch (messageType) {
-        case MESSAGE_TYPES.CLOSE_CONNECT:
-          this.iframe.style.display = 'none';
-          this.handlers.onClose && this.handlers.onClose();
-          break;
-        case MESSAGE_TYPES.SEND_TOKEN:
-          this.iframe.style.display = 'none';
-          this.handlers.onSuccess(sessionToken);
-          break;
-        case MESSAGE_TYPES.MODAL_READY:
-          this.handlers.onLoad && this.handlers.onLoad();
-          break;
-      }
-    });
-  }
-
-  /**
-   * Used to pass messages to the modal iframe.
-   */
-  private passMessage(messageType: string, payload: Record<string, any>) {
-    if (this.iframe?.contentWindow) {
-      this.iframe.contentWindow.postMessage(
-        {
-          payload,
-          messageType,
-        },
-        '*'
-      );
-    }
-  }
-
-  /**
    * Ensure the modal has been loaded to the DOM.
    */
   private initModal() {
-    // ensure the modal hasn't already been loaded.
-    const modal = document.getElementById(GLOBAL_MODAL_ID) as HTMLIFrameElement;
+    // Ensure the modal hasn't already been loaded.
+    const modal = document.getElementById(GLOBAL_MODAL_ID);
     if (!!modal) {
-      this.iframe = modal;
+      this.iframe = modal as HTMLIFrameElement;
+      return;
     }
 
     const iframe = document.createElement('iframe');
@@ -87,6 +52,56 @@ export default class Vessel {
   }
 
   /**
+   * Used to handle messages sent from the modal iframe.
+   */
+  private initMessageHandler() {
+    const handler = ({ data }: any) => {
+      // ensure the modal exists.
+      if (!this.iframe) return;
+
+      const { messageType, sessionToken } = data;
+      const { onClose, onSuccess, onLoad } = this.handlers;
+
+      switch (messageType) {
+        case MESSAGE_TYPES.CLOSE_CONNECT:
+          this.iframe.style.display = 'none';
+          onClose && onClose();
+          break;
+        case MESSAGE_TYPES.SEND_TOKEN:
+          this.iframe.style.display = 'none';
+          onSuccess(sessionToken);
+          break;
+        case MESSAGE_TYPES.MODAL_READY:
+          onLoad && onLoad();
+          break;
+      }
+    };
+
+    window.addEventListener('message', handler);
+  }
+
+  /**
+   * Used to pass messages to the modal iframe.
+   */
+  private passMessage({
+    messageType,
+    payload,
+  }: {
+    messageType: string;
+    payload: Record<string, any>;
+  }) {
+    if (this.iframe?.contentWindow) {
+      this.iframe.contentWindow.postMessage(
+        {
+          payload,
+          messageType,
+        },
+        '*'
+      );
+    }
+  }
+
+  /**
    * Check if the modal has already been loaded to the DOM.
    * This is useful in situations where the consumer wants to check if
    * the modal has already been loaded before calling the constructor.
@@ -107,10 +122,24 @@ export default class Vessel {
     credentialsId?: string;
     getSessionToken: () => Promise<string>;
   }) {
-    const token = await getSessionToken();
-    // TODO: Get config from /integrations-config endpoints.
-    const config = {};
+    if (!this.iframe) {
+      console.error('VesselError: Open called before modal loaded.');
+      return;
+    }
 
-    this.passMessage(MESSAGE_TYPES.START_MODAL_FLOW, { config });
+    const token = await getSessionToken();
+    const { config } = await api.post('auth/integration-configs/get', {
+      token,
+      body: {
+        integrationId,
+        credentialsId,
+      },
+    });
+
+    this.iframe.style.display = 'block';
+    this.passMessage({
+      messageType: MESSAGE_TYPES.START_MODAL_FLOW,
+      payload: { config },
+    });
   }
 }

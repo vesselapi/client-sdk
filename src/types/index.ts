@@ -11,4 +11,7 @@ export interface Config {
   onLoad?: () => void;
 }
 
-export type IntegrationId = 'salesforce' | 'hubspot' | 'pipedrive';
+// The ids of the Integrations Vessel Supports.
+type CrmIntegrationId = 'salesforce' | 'hubspot' | 'pipedrive';
+type EngagementIntegrationId = 'salesloft' | 'apollo' | 'outreach';
+export type IntegrationId = CrmIntegrationId | EngagementIntegrationId;
