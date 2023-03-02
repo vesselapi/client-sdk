@@ -10,3 +10,5 @@ export interface Config {
   // ready to be opened.
   onLoad?: () => void;
 }
+
+export type IntegrationId = 'salesforce' | 'hubspot' | 'pipedrive';

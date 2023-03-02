@@ -1,5 +1,5 @@
 import { GLOBAL_MODAL_ID, MESSAGE_TYPES } from './constants';
-import type { Config } from './types';
+import type { Config, IntegrationId } from './types';
 
 /**
  * The Vessel Client SDK. Responsible for rendering and interacting
@@ -14,6 +14,9 @@ export default class Vessel {
     this.initModal();
   }
 
+  /**
+   * Used to handle messages sent from the modal iframe.
+   */
   private initMessageHandler() {
     window.addEventListener('message', ({ data }: any) => {
       // ensure the modal exists.
@@ -35,6 +38,21 @@ export default class Vessel {
           break;
       }
     });
+  }
+
+  /**
+   * Used to pass messages to the modal iframe.
+   */
+  private passMessage(messageType: string, payload: Record<string, any>) {
+    if (this.iframe?.contentWindow) {
+      this.iframe.contentWindow.postMessage(
+        {
+          payload,
+          messageType,
+        },
+        '*'
+      );
+    }
   }
 
   /**
@@ -77,5 +95,22 @@ export default class Vessel {
     return !!document.getElementById(`${GLOBAL_MODAL_ID}`);
   }
 
-  open() {}
+  /**
+   * Loads necessary config data and starts the modal connection flow.
+   */
+  async open({
+    integrationId,
+    credentialsId,
+    getSessionToken,
+  }: {
+    integrationId: IntegrationId;
+    credentialsId?: string;
+    getSessionToken: () => Promise<string>;
+  }) {
+    const token = await getSessionToken();
+    // TODO: Get config from /integrations-config endpoints.
+    const config = {};
+
+    this.passMessage(MESSAGE_TYPES.START_MODAL_FLOW, { config });
+  }
 }
