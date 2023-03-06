@@ -2,8 +2,8 @@ import API from './api';
 import { GLOBAL_MODAL_ID, MESSAGE_TYPES } from './constants';
 import type { Config, IntegrationId } from './types';
 
-const api = new API({
-  prefixUrl: process.env.API_URL as string,
+const api = API({
+  prefixUrl: 'https://api.vessel.land',
 });
 
 /**
