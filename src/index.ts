@@ -10,23 +10,17 @@ const api = new API({
  * The Vessel Client SDK. Responsible for rendering and interacting
  * with the authentication modal.
  */
-export default class Vessel {
-  private handlers: Config;
-  private iframe: HTMLIFrameElement | null = null;
+const Vessel = ({ onSuccess, onClose, onLoad }: Config) => {
+  let modal: HTMLIFrameElement | null = null;
 
-  constructor({ onSuccess, onClose, onLoad }: Config) {
-    this.handlers = { onSuccess, onClose, onLoad };
-    this.initModal();
-  }
+  // Check if the modal has already been loaded to the DOM.
+  const isLoaded = () => !!document.getElementById(`${GLOBAL_MODAL_ID}`);
 
-  /**
-   * Ensure the modal has been loaded to the DOM.
-   */
-  private initModal() {
-    // Ensure the modal hasn't already been loaded.
-    const modal = document.getElementById(GLOBAL_MODAL_ID);
-    if (!!modal) {
-      this.iframe = modal as HTMLIFrameElement;
+  // Ensure the modal element is loaded to the DOM
+  const addModal = () => {
+    const modalElement = document.getElementById(GLOBAL_MODAL_ID);
+    if (!!modalElement) {
+      modal = modalElement as HTMLIFrameElement;
       return;
     }
 
@@ -46,52 +40,40 @@ export default class Vessel {
       overflowY: auto;
     `;
     document.body.appendChild(iframe);
-    this.iframe = iframe;
+    modal = iframe;
+  };
 
-    this.initMessageHandler();
-  }
+  // The message handler
+  const handler = ({ data }: any) => {
+    if (!modal) return;
 
-  /**
-   * Used to handle messages sent from the modal iframe.
-   */
-  private initMessageHandler() {
-    const handler = ({ data }: any) => {
-      // ensure the modal exists.
-      if (!this.iframe) return;
+    const { messageType, sessionToken } = data;
 
-      const { messageType, sessionToken } = data;
-      const { onClose, onSuccess, onLoad } = this.handlers;
+    switch (messageType) {
+      case MESSAGE_TYPES.CLOSE_CONNECT:
+        modal.style.display = 'none';
+        onClose?.();
+        break;
+      case MESSAGE_TYPES.SEND_TOKEN:
+        modal.style.display = 'none';
+        onSuccess(sessionToken);
+        break;
+      case MESSAGE_TYPES.MODAL_READY:
+        onLoad?.();
+        break;
+    }
+  };
 
-      switch (messageType) {
-        case MESSAGE_TYPES.CLOSE_CONNECT:
-          this.iframe.style.display = 'none';
-          onClose && onClose();
-          break;
-        case MESSAGE_TYPES.SEND_TOKEN:
-          this.iframe.style.display = 'none';
-          onSuccess(sessionToken);
-          break;
-        case MESSAGE_TYPES.MODAL_READY:
-          onLoad && onLoad();
-          break;
-      }
-    };
-
-    window.addEventListener('message', handler);
-  }
-
-  /**
-   * Used to pass messages to the modal iframe.
-   */
-  private passMessage({
+  // Pass a message to the modal
+  const passMessage = ({
     messageType,
     payload,
   }: {
     messageType: string;
     payload: Record<string, any>;
-  }) {
-    if (this.iframe?.contentWindow) {
-      this.iframe.contentWindow.postMessage(
+  }) => {
+    if (modal?.contentWindow) {
+      modal.contentWindow.postMessage(
         {
           payload,
           messageType,
@@ -99,47 +81,46 @@ export default class Vessel {
         '*'
       );
     }
+  };
+
+  // ------- init the modal
+  if (!isLoaded()) {
+    addModal();
+    window.addEventListener('message', handler);
   }
 
-  /**
-   * Check if the modal has already been loaded to the DOM.
-   * This is useful in situations where the consumer wants to check if
-   * the modal has already been loaded before calling the constructor.
-   */
-  static get isLoaded() {
-    return !!document.getElementById(`${GLOBAL_MODAL_ID}`);
-  }
+  return {
+    isLoaded,
+    open: async ({
+      integrationId,
+      credentialsId,
+      getSessionToken,
+    }: {
+      integrationId: IntegrationId;
+      credentialsId?: string;
+      getSessionToken: () => Promise<string>;
+    }) => {
+      if (!modal) {
+        console.error('VesselError: Open called before modal loaded.');
+        return;
+      }
 
-  /**
-   * Loads necessary config data and starts the modal connection flow.
-   */
-  async open({
-    integrationId,
-    credentialsId,
-    getSessionToken,
-  }: {
-    integrationId: IntegrationId;
-    credentialsId?: string;
-    getSessionToken: () => Promise<string>;
-  }) {
-    if (!this.iframe) {
-      console.error('VesselError: Open called before modal loaded.');
-      return;
-    }
+      const token = await getSessionToken();
+      const { config } = await api.post('auth/integration-configs/get', {
+        token,
+        body: {
+          integrationId,
+          credentialsId,
+        },
+      });
 
-    const token = await getSessionToken();
-    const { config } = await api.post('auth/integration-configs/get', {
-      token,
-      body: {
-        integrationId,
-        credentialsId,
-      },
-    });
+      modal.style.display = 'block';
+      passMessage({
+        messageType: MESSAGE_TYPES.START_MODAL_FLOW,
+        payload: { config },
+      });
+    },
+  };
+};
 
-    this.iframe.style.display = 'block';
-    this.passMessage({
-      messageType: MESSAGE_TYPES.START_MODAL_FLOW,
-      payload: { config },
-    });
-  }
-}
+export default Vessel;
