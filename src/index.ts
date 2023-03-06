@@ -1,6 +1,6 @@
 import API from './api';
 import { GLOBAL_MODAL_ID, MESSAGE_TYPES } from './constants';
-import type { Config, IntegrationId } from './types';
+import type { Config } from './types';
 
 const api = API({
   prefixUrl: 'https://api.vessel.land',
@@ -96,7 +96,7 @@ const Vessel = ({ onSuccess, onClose, onLoad }: Config) => {
       credentialsId,
       getSessionToken,
     }: {
-      integrationId: IntegrationId;
+      integrationId: string;
       credentialsId?: string;
       getSessionToken: () => Promise<string>;
     }) => {
