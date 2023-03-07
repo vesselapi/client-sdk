@@ -1,7 +1,6 @@
 {
   "name": "@vesselapi/client-sdk",
-  "version": "0.0.1",
-  "private": true,
+  "version": "0.1.1",
   "description": "Vessel API Client SDK",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
@@ -17,8 +16,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint --fix",
     "format": "prettier --write './**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc",
-    "build": "rollup -c",
-    "publish-package": "yarn build; yarn publish --access public"
+    "build": "rollup -c"
   },
   "repository": {
     "type": "git",
