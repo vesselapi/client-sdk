@@ -25,7 +25,7 @@
     "url": "git+https://github.com/vesselapi/client-sdk.git"
   },
   "author": "vessel",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/vesselapi/client-sdk/issues"
   },
