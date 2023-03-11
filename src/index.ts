@@ -3,7 +3,7 @@ import { GLOBAL_MODAL_ID, MESSAGE_TYPES } from './constants';
 import type { Config } from './types';
 
 const api = API({
-  prefixUrl: 'https://api.vessel.land',
+  prefixUrl: 'https://api.vessel.dev',
 });
 
 /**
@@ -93,11 +93,11 @@ const Vessel = ({ onSuccess, onClose, onLoad }: Config) => {
     isLoaded,
     open: async ({
       integrationId,
-      credentialsId,
+      oauthAppId,
       getSessionToken,
     }: {
       integrationId: string;
-      credentialsId?: string;
+      oauthAppId?: string;
       getSessionToken: () => Promise<string>;
     }) => {
       if (!modal) {
@@ -105,19 +105,18 @@ const Vessel = ({ onSuccess, onClose, onLoad }: Config) => {
         return;
       }
 
-      const token = await getSessionToken();
-      const { config } = await api.post('auth/integration-configs/get', {
-        token,
+      const sessionToken = await getSessionToken();
+      const { integration } = await api.post('integrations/find', {
+        sessionToken,
         body: {
-          integrationId,
-          credentialsId,
+          id: integrationId,
         },
       });
 
       modal.style.display = 'block';
       passMessage({
         messageType: MESSAGE_TYPES.START_MODAL_FLOW,
-        payload: { config },
+        payload: { integration, oauthAppId, sessionToken },
       });
     },
   };
