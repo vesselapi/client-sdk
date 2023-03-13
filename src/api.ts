@@ -1,5 +1,5 @@
 interface Options {
-  token: string;
+  sessionToken: string;
   body?: any;
 }
 
@@ -10,7 +10,7 @@ const API = ({ prefixUrl }: { prefixUrl: string }) => ({
       body: options.body,
       headers: {
         'Content-Type': 'application/json',
-        'x-vessel-session-token': options.token,
+        'x-vessel-session-token': options.sessionToken,
       },
     });
     return await response.json();
