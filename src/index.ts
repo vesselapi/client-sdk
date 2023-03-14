@@ -103,10 +103,12 @@ const Vessel = (
     open: async ({
       integrationId,
       oauthAppId,
+      authType,
       getSessionToken,
     }: {
       integrationId: string;
       oauthAppId?: string;
+      authType?: string;
       getSessionToken: () => Promise<string>;
     }) => {
       if (!modal) {
@@ -125,7 +127,7 @@ const Vessel = (
       modal.style.display = 'block';
       passMessage({
         messageType: MESSAGE_TYPES.START_MODAL_FLOW,
-        payload: { integration, oauthAppId, sessionToken },
+        payload: { integration, oauthAppId, sessionToken, authType },
       });
     },
   };
