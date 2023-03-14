@@ -13,7 +13,11 @@ const API = ({ prefixUrl }: { prefixUrl: string }) => ({
         'x-vessel-session-token': options.sessionToken,
       },
     });
-    return await response.json();
+    const json = await response.json();
+    if (json.error) {
+      throw json.error;
+    }
+    return json.result;
   },
 });
 
