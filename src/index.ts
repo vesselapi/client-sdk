@@ -1,16 +1,25 @@
 import API from './api';
-import { GLOBAL_MODAL_ID, MESSAGE_TYPES } from './constants';
+import { GLOBAL_MODAL_ID, MESSAGE_TYPES, BASE_URL } from './constants';
 import type { Config } from './types';
-
-const api = API({
-  prefixUrl: 'https://api.vessel.dev',
-});
 
 /**
  * The Vessel Client SDK. Responsible for rendering and interacting
  * with the authentication modal.
  */
-const Vessel = ({ onSuccess, onClose, onLoad }: Config) => {
+const Vessel = (
+  { onSuccess, onClose, onLoad }: Config,
+  {
+    baseUrl,
+  }: {
+    baseUrl: string;
+  } = {
+    baseUrl: BASE_URL,
+  }
+) => {
+  const api = API({
+    prefixUrl: BASE_URL,
+  });
+
   let modal: HTMLIFrameElement | null = null;
 
   // Check if the modal has already been loaded to the DOM.
@@ -25,7 +34,7 @@ const Vessel = ({ onSuccess, onClose, onLoad }: Config) => {
     }
 
     const iframe = document.createElement('iframe');
-    iframe.src = process.env.MODAL_URL as string;
+    iframe.src = `${BASE_URL}/modal/index.html`;
     iframe.id = GLOBAL_MODAL_ID;
     iframe.style.cssText = `
       position: fixed;

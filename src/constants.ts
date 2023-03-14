@@ -6,3 +6,4 @@ export const MESSAGE_TYPES = {
   SEND_TOKEN: '_vessel_send_token_',
   MODAL_READY: '_vessel_modal_ready_',
 };
+export const BASE_URL = 'https://api.vessel.dev'
