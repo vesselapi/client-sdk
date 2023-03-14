@@ -17,7 +17,7 @@ const Vessel = (
   }
 ) => {
   const api = API({
-    prefixUrl: BASE_URL,
+    prefixUrl: baseUrl,
   });
 
   let modal: HTMLIFrameElement | null = null;
@@ -34,7 +34,7 @@ const Vessel = (
     }
 
     const iframe = document.createElement('iframe');
-    iframe.src = `${BASE_URL}/modal/index.html`;
+    iframe.src = `${baseUrl}/modal/index.html`;
     iframe.id = GLOBAL_MODAL_ID;
     iframe.style.cssText = `
       position: fixed;
