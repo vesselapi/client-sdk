@@ -115,7 +115,7 @@ const Vessel = (
       }
 
       const sessionToken = await getSessionToken();
-      const { integration } = await api.post('integrations/find', {
+      const { integration } = await api.post('api/integrations/find', {
         sessionToken,
         body: {
           id: integrationId,
