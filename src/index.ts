@@ -1,16 +1,36 @@
 import API from './api';
-import { GLOBAL_MODAL_ID, MESSAGE_TYPES } from './constants';
+import { GLOBAL_MODAL_ID, MESSAGE_TYPES, BASE_URL } from './constants';
 import type { Config } from './types';
 
-const api = API({
-  prefixUrl: 'https://api.vessel.dev',
-});
+export class VesselError extends Error {
+  metadata: Record<string, string | number | boolean | undefined | null>;
+  constructor(
+    message: string,
+    metadata?: Record<string, string | number | boolean | undefined | null>
+  ) {
+    super(message);
+    this.metadata = metadata ?? {};
+  }
+}
 
 /**
  * The Vessel Client SDK. Responsible for rendering and interacting
  * with the authentication modal.
  */
-const Vessel = ({ onSuccess, onClose, onLoad }: Config) => {
+const Vessel = (
+  { onSuccess, onClose, onLoad }: Config,
+  {
+    baseUrl,
+  }: {
+    baseUrl: string;
+  } = {
+    baseUrl: BASE_URL,
+  }
+) => {
+  const api = API({
+    prefixUrl: baseUrl,
+  });
+
   let modal: HTMLIFrameElement | null = null;
 
   // Check if the modal has already been loaded to the DOM.
@@ -25,7 +45,7 @@ const Vessel = ({ onSuccess, onClose, onLoad }: Config) => {
     }
 
     const iframe = document.createElement('iframe');
-    iframe.src = process.env.MODAL_URL as string;
+    iframe.src = `${baseUrl}/modal/index.html`;
     iframe.id = GLOBAL_MODAL_ID;
     iframe.style.cssText = `
       position: fixed;
@@ -94,10 +114,12 @@ const Vessel = ({ onSuccess, onClose, onLoad }: Config) => {
     open: async ({
       integrationId,
       oauthAppId,
+      authType,
       getSessionToken,
     }: {
       integrationId: string;
       oauthAppId?: string;
+      authType?: string;
       getSessionToken: () => Promise<string>;
     }) => {
       if (!modal) {
@@ -106,17 +128,44 @@ const Vessel = ({ onSuccess, onClose, onLoad }: Config) => {
       }
 
       const sessionToken = await getSessionToken();
-      const { integration } = await api.post('integrations/find', {
-        sessionToken,
-        body: {
+      const { integration } = await api.integrations.find(
+        {
           id: integrationId,
         },
-      });
+        { sessionToken }
+      );
+
+      const authConfig = authType
+        ? integration.auth.find((a) => a.type === authType)
+        : integration.auth.find((a) => a.default === true);
+
+      if (!authConfig) {
+        if (authType) {
+          throw new VesselError(
+            'The specified integration does not have an auth strategy for the given auth type',
+            {
+              integrationId,
+              authType,
+            }
+          );
+        }
+        throw new VesselError(
+          'The specified integration does not have a default auth strategy',
+          {
+            integrationId,
+          }
+        );
+      }
 
       modal.style.display = 'block';
       passMessage({
         messageType: MESSAGE_TYPES.START_MODAL_FLOW,
-        payload: { integration, oauthAppId, sessionToken },
+        payload: {
+          integration,
+          oauthAppId,
+          sessionToken,
+          auth: authConfig,
+        },
       });
     },
   };

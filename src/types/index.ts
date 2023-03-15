@@ -10,3 +10,14 @@ export interface Config {
   // ready to be opened.
   onLoad?: () => void;
 }
+
+/**
+ * Smallest interface required to represent the
+ * integration object in the vessel sdk.
+ */
+export interface Integration {
+  auth: {
+    type: string;
+    default: boolean;
+  }[];
+}
