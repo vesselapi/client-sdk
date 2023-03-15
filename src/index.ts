@@ -2,6 +2,17 @@ import API from './api';
 import { GLOBAL_MODAL_ID, MESSAGE_TYPES, BASE_URL } from './constants';
 import type { Config } from './types';
 
+export class VesselError extends Error {
+  metadata: Record<string, string | number | boolean | undefined | null>;
+  constructor(
+    message: string,
+    metadata?: Record<string, string | number | boolean | undefined | null>
+  ) {
+    super(message);
+    this.metadata = metadata ?? {};
+  }
+}
+
 /**
  * The Vessel Client SDK. Responsible for rendering and interacting
  * with the authentication modal.
@@ -117,17 +128,36 @@ const Vessel = (
       }
 
       const sessionToken = await getSessionToken();
-      const { integration } = await api.post('api/integrations/find', {
-        sessionToken,
-        body: {
+      const { integration } = await api.integrations.find(
+        {
           id: integrationId,
         },
-      });
+        { sessionToken }
+      );
+
+      const authConfig = authType
+        ? integration.auth.find((a) => a.type === authType)
+        : integration.auth.find((a) => a.default === true);
+
+      if (!authConfig) {
+        throw new VesselError(
+          'Could not find an auth strategy for the given integration id and auth type',
+          {
+            integrationId,
+            authType,
+          }
+        );
+      }
 
       modal.style.display = 'block';
       passMessage({
         messageType: MESSAGE_TYPES.START_MODAL_FLOW,
-        payload: { integration, oauthAppId, sessionToken, authType },
+        payload: {
+          integration,
+          oauthAppId,
+          sessionToken,
+          authType,
+        },
       });
     },
   };
