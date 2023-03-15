@@ -140,11 +140,19 @@ const Vessel = (
         : integration.auth.find((a) => a.default === true);
 
       if (!authConfig) {
+        if (authType) {
+          throw new VesselError(
+            'The specified integration does not have an auth strategy for the given auth type',
+            {
+              integrationId,
+              authType,
+            }
+          );
+        }
         throw new VesselError(
-          'Could not find an auth strategy for the given integration id and auth type',
+          'The specified integration does not have a default auth strategy',
           {
             integrationId,
-            authType,
           }
         );
       }
@@ -156,7 +164,7 @@ const Vessel = (
           integration,
           oauthAppId,
           sessionToken,
-          authType,
+          auth: authConfig,
         },
       });
     },
