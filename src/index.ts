@@ -47,6 +47,7 @@ const Vessel = (
     const iframe = document.createElement('iframe');
     iframe.src = `${baseUrl}/modal/index.html`;
     iframe.id = GLOBAL_MODAL_ID;
+    iframe.setAttribute('sandbox', 'allow-scripts allow-top-navigation');
     iframe.style.cssText = `
       position: fixed;
       top: 0;
