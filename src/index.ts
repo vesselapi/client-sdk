@@ -157,12 +157,18 @@ const Vessel = (
         );
       }
 
+      const getOauthAppId = () => {
+        if (oauthAppId) return oauthAppId;
+        if (authConfig.type !== 'oauth2') return null;
+        return `v_oauthapp_${integrationId}_default`;
+      };
+
       modal.style.display = 'block';
       passMessage({
         messageType: MESSAGE_TYPES.START_MODAL_FLOW,
         payload: {
           integration,
-          oauthAppId,
+          oauthAppId: getOauthAppId(),
           sessionToken,
           auth: authConfig,
         },
