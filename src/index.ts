@@ -162,7 +162,9 @@ const Vessel = (
         messageType: MESSAGE_TYPES.START_MODAL_FLOW,
         payload: {
           integration,
-          oauthAppId,
+          oauthAppId: oauthAppId
+            ? oauthAppId
+            : `v_oauthapp_${integrationId}_default}`,
           sessionToken,
           auth: authConfig,
         },
