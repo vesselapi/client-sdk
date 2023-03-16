@@ -49,7 +49,7 @@ const Vessel = (
     iframe.id = GLOBAL_MODAL_ID;
     iframe.setAttribute(
       'sandbox',
-      'allow-modals allow-scripts allow-top-navigation allow-popups-to-escape-sandbox allow-same-origin'
+      'allow-modals allow-scripts allow-top-navigation allow-popups-to-escape-sandbox allow-same-origin allow-popups'
     );
     iframe.style.cssText = `
       position: fixed;
