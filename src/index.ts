@@ -164,7 +164,7 @@ const Vessel = (
           integration,
           oauthAppId: oauthAppId
             ? oauthAppId
-            : `v_oauthapp_${integrationId}_default}`,
+            : `v_oauthapp_${integrationId}_default`,
           sessionToken,
           auth: authConfig,
         },
