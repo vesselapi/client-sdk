@@ -6,8 +6,11 @@ interface Options {
 }
 
 const API = ({ prefixUrl }: { prefixUrl: string }) => {
-  const post = async (path: string, options: Options) => {
-    const response = await fetch(`${prefixUrl}${path}`, {
+  const url = prefixUrl.endsWith('/')
+    ? prefixUrl.replace(/\/$/, '')
+    : prefixUrl;
+  const post = async (path: `/${string}`, options: Options) => {
+    const response = await fetch(`${url}${path}`, {
       method: 'POST',
       body: options.body ? JSON.stringify(options.body) : undefined,
       headers: {
@@ -30,7 +33,7 @@ const API = ({ prefixUrl }: { prefixUrl: string }) => {
       ): Promise<{
         integration: Integration;
       }> => {
-        return post('api/integrations/find', {
+        return post('/api/integrations/find', {
           sessionToken: auth.sessionToken,
           body: body,
         });
