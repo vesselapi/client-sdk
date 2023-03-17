@@ -171,7 +171,7 @@ const Vessel = (
           oauthAppId: getOauthAppId(),
           sessionToken,
           auth: authConfig,
-          baseUrl
+          baseUrl,
         },
       });
     },
