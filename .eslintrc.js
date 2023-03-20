@@ -1,15 +1,15 @@
 module.exports = {
+  parser: '@typescript-eslint/parser',
+  plugins: ['@typescript-eslint'],
+  ignorePatterns: ['*.test.ts'],
   env: {
-    browser: true,
-    es2021: true,
-  },
-  extends: ['airbnb', 'plugin:prettier/recommended'],
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
+    es6: true,
+    node: true,
   },
   rules: {
-    'import/extensions': 0,
-    'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
+    '@typescript-eslint/no-floating-promises': 'error',
+  },
+  parserOptions: {
+    project: ['./tsconfig.json'], // Specify it only for TypeScript files
   },
 };
