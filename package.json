@@ -16,6 +16,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint --fix",
     "format": "prettier --write './**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc",
+    "format:check": "prettier --check \"src/**/*.ts\" --ignore-unknown",
     "build": "rollup -c"
   },
   "repository": {
