@@ -12,7 +12,7 @@ const API = ({ prefixUrl }: { prefixUrl: string }) => {
   const post = async (path: `/${string}`, options: Options) => {
     const response = await fetch(`${url}${path}`, {
       method: 'POST',
-      body: options.body ? JSON.stringify(options.body) : undefined,
+      body: options.body,
       headers: {
         'Content-Type': 'application/json',
         'x-vessel-session-token': options.sessionToken,
