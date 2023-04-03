@@ -1,6 +1,6 @@
 import API from './api';
 import { GLOBAL_MODAL_ID, MESSAGE_TYPES, BASE_URL } from './constants';
-import type { Config } from './types';
+import type { Config, Url } from './types';
 
 export class VesselError extends Error {
   metadata: Record<string, string | number | boolean | undefined | null>;
@@ -22,7 +22,7 @@ const Vessel = (
   {
     baseUrl,
   }: {
-    baseUrl: string;
+    baseUrl: Url;
   } = {
     baseUrl: BASE_URL,
   }
@@ -30,20 +30,9 @@ const Vessel = (
   const api = API({
     prefixUrl: baseUrl,
   });
+  const isLoaded = () => !!document.getElementById(GLOBAL_MODAL_ID);
 
-  let modal: HTMLIFrameElement | null = null;
-
-  // Check if the modal has already been loaded to the DOM.
-  const isLoaded = () => !!document.getElementById(`${GLOBAL_MODAL_ID}`);
-
-  // Ensure the modal element is loaded to the DOM
   const addModal = () => {
-    const modalElement = document.getElementById(GLOBAL_MODAL_ID);
-    if (!!modalElement) {
-      modal = modalElement as HTMLIFrameElement;
-      return;
-    }
-
     const iframe = document.createElement('iframe');
     iframe.src = `${baseUrl}/modal/index.html`;
     iframe.id = GLOBAL_MODAL_ID;
@@ -60,32 +49,47 @@ const Vessel = (
       overflowY: auto;
     `;
     document.body.appendChild(iframe);
-    modal = iframe;
+    return iframe;
   };
 
   // The message handler
-  const handler = ({ data }: any) => {
-    if (!modal) return;
+  const initHandler =
+    (iframe: HTMLIFrameElement) =>
+    ({ data }: any) => {
+      if (!iframe) return;
 
-    const { messageType, sessionToken } = data;
+      const { messageType, sessionToken } = data;
 
-    switch (messageType) {
-      case MESSAGE_TYPES.CLOSE_CONNECT:
-        modal.style.display = 'none';
-        onClose?.();
-        break;
-      case MESSAGE_TYPES.SEND_TOKEN:
-        modal.style.display = 'none';
-        onSuccess(sessionToken);
-        break;
-      case MESSAGE_TYPES.MODAL_READY:
-        onLoad?.();
-        break;
+      switch (messageType) {
+        case MESSAGE_TYPES.CLOSE_CONNECT:
+          iframe.style.display = 'none';
+          onClose?.();
+          break;
+        case MESSAGE_TYPES.SEND_TOKEN:
+          iframe.style.display = 'none';
+          onSuccess(sessionToken);
+          break;
+        case MESSAGE_TYPES.MODAL_READY:
+          onLoad?.();
+          break;
+      }
+    };
+
+  const getModal = () => {
+    let modal = document.getElementById(GLOBAL_MODAL_ID) as HTMLIFrameElement;
+    if (!modal) {
+      modal = addModal();
+      // Must be attached exactly once or we'll send multiple repeated messages
+      window.addEventListener('message', initHandler(modal));
     }
+
+    return modal;
   };
 
+  const modal: HTMLIFrameElement = getModal();
+
   // Pass a message to the modal
-  const passMessage = ({
+  const postMsg = ({
     messageType,
     payload,
   }: {
@@ -103,14 +107,7 @@ const Vessel = (
     }
   };
 
-  // ------- init the modal
-  if (!isLoaded()) {
-    addModal();
-    window.addEventListener('message', handler);
-  }
-
   return {
-    isLoaded,
     open: async ({
       integrationId,
       oauthAppId,
@@ -164,7 +161,7 @@ const Vessel = (
       };
 
       modal.style.display = 'block';
-      passMessage({
+      postMsg({
         messageType: MESSAGE_TYPES.START_MODAL_FLOW,
         payload: {
           integration,
