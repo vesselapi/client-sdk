@@ -21,3 +21,5 @@ export interface Integration {
     default: boolean;
   }[];
 }
+
+export type Url = `https://${string}` | `http://${string}`;

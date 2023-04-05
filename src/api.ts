@@ -14,7 +14,7 @@ const API = ({ prefixUrl }: { prefixUrl: string }) => {
       method: 'POST',
       body: options.body ? JSON.stringify(options.body) : undefined,
       headers: {
-        'Content-Type': 'application/json',
+        'content-type': 'application/json',
         'x-vessel-session-token': options.sessionToken,
       },
     });
