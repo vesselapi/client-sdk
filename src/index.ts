@@ -30,8 +30,6 @@ const Vessel = (
   const api = API({
     prefixUrl: baseUrl,
   });
-  const isLoaded = () => !!document.getElementById(GLOBAL_MODAL_ID);
-
   const addModal = () => {
     const iframe = document.createElement('iframe');
     iframe.src = `${baseUrl}/modal/index.html`;
@@ -124,6 +122,17 @@ const Vessel = (
         return;
       }
 
+      if (authType && authType !== 'oauth2' && oauthAppId) {
+        throw new VesselError(
+          'If an oauthAppId is specified, the authType must be "oauth2"',
+          {
+            integrationId,
+            oauthAppId,
+            authType,
+          }
+        );
+      }
+
       const sessionToken = await getSessionToken();
       const { integration } = await api.integrations.find(
         {
@@ -155,6 +164,7 @@ const Vessel = (
       }
 
       const getOauthAppId = () => {
+        console.log('app!', oauthAppId);
         if (oauthAppId) return oauthAppId;
         if (authConfig.type !== 'oauth2') return null;
         return `v_oauthapp_${integrationId}_default`;
