@@ -77,7 +77,7 @@ const Vessel = (
     let modal = document.getElementById(GLOBAL_MODAL_ID) as HTMLIFrameElement;
     if (!modal) {
       modal = addModal();
-      // Must be attached exactly once or we'll send multiple repeated messages
+      // Must be attached exactly once or we'll send multiple messages
       window.addEventListener('message', initHandler(modal));
     }
 
