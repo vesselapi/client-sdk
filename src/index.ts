@@ -164,7 +164,6 @@ const Vessel = (
       }
 
       const getOauthAppId = () => {
-        console.log('app!', oauthAppId);
         if (oauthAppId) return oauthAppId;
         if (authConfig.type !== 'oauth2') return null;
         return `v_oauthapp_${integrationId}_default`;
