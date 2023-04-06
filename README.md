@@ -16,9 +16,7 @@ yarn add @vesselapi/react-vessel-link
 
 ## Usage
 
-When the Vessel client SDK is instantiated, a hidden modal iframe is attached to your application. When opened, the modal iframe (pictured below) will show the authentication flow for a given integration to your user.
-
-![Outreach Modal](../images/outreach-modal.png)
+When the Vessel client SDK is instantiated, a hidden modal iframe is attached to your application. When opened, the modal iframe will show the authentication flow for a given integration to your user.
 
 **Default Usage**
 
