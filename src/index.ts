@@ -4,7 +4,7 @@ import type { Config, Url } from './types';
 
 declare global {
   interface Window {
-    __vessel_sdk?: {
+    __vessel__?: {
       callback?: (arg: any) => void;
     };
   }
@@ -59,8 +59,8 @@ const Vessel = (
     };
   }
 
-  if (!window.__vessel_sdk) {
-    window.__vessel_sdk = {};
+  if (!window.__vessel__) {
+    window.__vessel__ = {};
   }
 
   const api = API({
@@ -119,16 +119,16 @@ const Vessel = (
 
   const modal: HTMLIFrameElement = getModal();
 
-  if (!window.__vessel_sdk) {
+  if (!window.__vessel__) {
     throw new VesselError('Invalid state: the vessel sdk was destroyed');
   }
 
-  if (window.__vessel_sdk?.callback) {
-    window.removeEventListener('message', window.__vessel_sdk?.callback);
+  if (window.__vessel__?.callback) {
+    window.removeEventListener('message', window.__vessel__?.callback);
   }
 
-  window.__vessel_sdk.callback = initHandler(modal);
-  window.addEventListener('message', window.__vessel_sdk.callback);
+  window.__vessel__.callback = initHandler(modal);
+  window.addEventListener('message', window.__vessel__.callback);
 
   // Pass a message to the modal
   const postMsg = ({
@@ -229,7 +229,7 @@ const Vessel = (
     destroy: async () => {
       const modal = document.getElementById(GLOBAL_MODAL_ID);
       modal?.remove();
-      delete window.__vessel_sdk;
+      delete window.__vessel__;
     },
   };
 };
