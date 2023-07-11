@@ -114,22 +114,21 @@ const Vessel = (
     const modal =
       (document.getElementById(GLOBAL_MODAL_ID) as HTMLIFrameElement) ??
       addModal();
-
-    if (!window.__vessel_sdk) {
-      throw new VesselError('Invalid state: the vessel sdk was destroyed');
-    }
-
-    if (window.__vessel_sdk?.callback) {
-      window.removeEventListener('message', window.__vessel_sdk?.callback);
-    }
-
-    window.__vessel_sdk.callback = initHandler(modal);
-    window.addEventListener('message', window.__vessel_sdk.callback);
-
     return modal;
   };
 
   const modal: HTMLIFrameElement = getModal();
+
+  if (!window.__vessel_sdk) {
+    throw new VesselError('Invalid state: the vessel sdk was destroyed');
+  }
+
+  if (window.__vessel_sdk?.callback) {
+    window.removeEventListener('message', window.__vessel_sdk?.callback);
+  }
+
+  window.__vessel_sdk.callback = initHandler(modal);
+  window.addEventListener('message', window.__vessel_sdk.callback);
 
   // Pass a message to the modal
   const postMsg = ({
