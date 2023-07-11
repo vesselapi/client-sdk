@@ -227,8 +227,8 @@ const Vessel = (
       });
     },
     destroy: async () => {
-      const modal = getModal();
-      modal.remove();
+      const modal = document.getElementById(GLOBAL_MODAL_ID);
+      modal?.remove();
       delete window.__vessel_sdk;
     },
   };
