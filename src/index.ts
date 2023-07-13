@@ -2,6 +2,14 @@ import API from './api';
 import { GLOBAL_MODAL_ID, MESSAGE_TYPES, BASE_URL } from './constants';
 import type { Config, Url } from './types';
 
+declare global {
+  interface Window {
+    __vessel__?: {
+      callback?: (arg: any) => void;
+    };
+  }
+}
+
 export class VesselError extends Error {
   metadata: Record<string, string | number | boolean | undefined | null>;
   constructor(
@@ -12,6 +20,22 @@ export class VesselError extends Error {
     this.metadata = metadata ?? {};
   }
 }
+
+const isSSR = () =>
+  typeof window === 'undefined' ||
+  !window.document ||
+  !window.document.createElement;
+
+type VesselClient = {
+  location: 'server' | 'client';
+  open: (options: {
+    integrationId: string;
+    oauthAppId?: string;
+    authType?: string;
+    getSessionToken: () => Promise<string>;
+  }) => Promise<void>;
+  destroy: () => Promise<void>;
+};
 
 /**
  * The Vessel Client SDK. Responsible for rendering and interacting
@@ -26,10 +50,23 @@ const Vessel = (
   } = {
     baseUrl: BASE_URL,
   }
-) => {
+): VesselClient => {
+  if (isSSR()) {
+    return {
+      location: 'server',
+      open: async () => {},
+      destroy: async () => {},
+    };
+  }
+
+  if (!window.__vessel__) {
+    window.__vessel__ = {};
+  }
+
   const api = API({
     prefixUrl: baseUrl,
   });
+
   const addModal = () => {
     const iframe = document.createElement('iframe');
     iframe.src = `${baseUrl}/modal/index.html`;
@@ -74,17 +111,24 @@ const Vessel = (
     };
 
   const getModal = () => {
-    let modal = document.getElementById(GLOBAL_MODAL_ID) as HTMLIFrameElement;
-    if (!modal) {
-      modal = addModal();
-      // Must be attached exactly once or we'll send multiple messages
-      window.addEventListener('message', initHandler(modal));
-    }
-
+    const modal =
+      (document.getElementById(GLOBAL_MODAL_ID) as HTMLIFrameElement) ??
+      addModal();
     return modal;
   };
 
   const modal: HTMLIFrameElement = getModal();
+
+  if (!window.__vessel__) {
+    throw new VesselError('Invalid state: the vessel sdk was destroyed');
+  }
+
+  if (window.__vessel__?.callback) {
+    window.removeEventListener('message', window.__vessel__?.callback);
+  }
+
+  window.__vessel__.callback = initHandler(modal);
+  window.addEventListener('message', window.__vessel__.callback);
 
   // Pass a message to the modal
   const postMsg = ({
@@ -106,6 +150,7 @@ const Vessel = (
   };
 
   return {
+    location: 'client',
     open: async ({
       integrationId,
       oauthAppId,
@@ -180,6 +225,11 @@ const Vessel = (
           baseUrl,
         },
       });
+    },
+    destroy: async () => {
+      const modal = document.getElementById(GLOBAL_MODAL_ID);
+      modal?.remove();
+      delete window.__vessel__;
     },
   };
 };
