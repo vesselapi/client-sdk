@@ -69,7 +69,7 @@ const Vessel = (
 
   const addModal = () => {
     const iframe = document.createElement('iframe');
-    iframe.src = `${baseUrl}/modal/index.html`;
+    iframe.src = `https://app.vessel.dev/modal/index.html`;
     iframe.id = GLOBAL_MODAL_ID;
     iframe.style.cssText = `
       position: fixed;
