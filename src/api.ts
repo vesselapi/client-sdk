@@ -33,10 +33,15 @@ const API = ({ prefixUrl }: { prefixUrl: string }) => {
       ): Promise<{
         integration: Integration;
       }> => {
-        return post('/api/integrations/find', {
-          sessionToken: auth.sessionToken,
-          body: body,
-        });
+        return post(
+          prefixUrl.includes('api.vessel.dev')
+            ? '/integrations/find'
+            : '/api/integrations/find',
+          {
+            sessionToken: auth.sessionToken,
+            body: body,
+          }
+        );
       },
     },
   };
