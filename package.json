@@ -1,6 +1,6 @@
 {
   "name": "@vesselapi/client-sdk",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "description": "Vessel API Client SDK",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
